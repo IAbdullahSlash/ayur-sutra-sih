@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Doctor Dashboard</title>
+  <style>
+    /* Color system (4 total): teal #0ea5a5, dark #0f172a, gray #e5e7eb, white #ffffff */
+    :root{
+      --primary:#0ea5a5;
+      --fg:#0f172a;
+      --muted:#e5e7eb;
+      --bg:#ffffff;
+      --radius:12px;
+    }
+    /* Reset + base */
+    *,*::before,*::after{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--fg);
+      background:var(--bg);
+      line-height:1.5;
+    }
+    img{max-width:100%;display:block}
+    button{font:inherit}
+    /* Layout (no sidebar) */
+    .container{
+      max-width:1100px;
+      margin-inline:auto;
+      padding:16px;
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+    }
+    header.topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:12px 16px;
+      background:var(--bg);
+      border:1px solid var(--muted);
+      border-radius:var(--radius);
+      position:sticky; top:8px; z-index:10;
+    }
+    .doc{
+      display:flex; align-items:center; gap:12px;
+    }
+    .avatar{
+      width:44px; height:44px; border-radius:50%;
+      border:3px solid var(--primary);
+      background:linear-gradient(#e6fffe,#ccfbf1);
+      flex-shrink:0;
+    }
+    .doc h1{
+      margin:0; font-size:18px;
+    }
+    .doc p{margin:0; font-size:14px; color:#475569}
+    .searchbar{
+      display:flex; gap:8px; align-items:center;
+      width:100%; max-width:420px;
+      background:#f8fafc; border:1px solid var(--muted); border-radius:999px; padding:8px 12px;
+    }
+    .searchbar input{
+      border:none; outline:none; background:transparent; flex:1; min-width:0;
+    }
+    .content{
+      display:grid; grid-template-columns:1fr; gap:16px;
+    }
+    @media (min-width: 900px){
+      .content{ grid-template-columns: 1.2fr 1fr; }
+    }
+    /* Schedule card */
+    .card{
+      border:1px solid var(--muted);
+      border-radius:var(--radius);
+      background:var(--bg);
+      overflow:hidden;
+    }
+    .card .card-head{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:12px 16px; border-bottom:1px solid var(--muted);
+    }
+    .card h2{margin:0; font-size:18px}
+    .slots{ display:flex; flex-direction:column; }
+    .slot{
+      display:flex; gap:12px; align-items:center;
+      padding:12px 16px; cursor:pointer; border-bottom:1px dashed var(--muted);
+    }
+    .slot:last-child{ border-bottom:none }
+    .time{
+      font-weight:600; color:var(--primary); width:68px; flex-shrink:0;
+    }
+    .patient{
+      display:flex; flex-direction:column; gap:2px; min-width:0;
+    }
+    .patient .name{ font-weight:600; white-space:nowrap; text-overflow:ellipsis; overflow:hidden }
+    .patient .reason{ font-size:13px; color:#475569; white-space:nowrap; text-overflow:ellipsis; overflow:hidden }
+    .status{
+      margin-left:auto; font-size:12px; padding:4px 8px; border-radius:999px; border:1px solid var(--muted); color:#334155; background:#f8fafc;
+    }
+    /* Right column widgets */
+    .widget{
+      border:1px solid var(--muted);
+      border-radius:var(--radius);
+      padding:12px 16px; background:var(--bg);
+    }
+    .mini-list{display:flex; flex-direction:column; gap:8px; margin-top:8px}
+    .mini-item{display:flex; justify-content:space-between; gap:8px}
+    .mini-item span:last-child{ color:#475569 }
+    /* Floating Add button */
+    .fab{
+      position:fixed; right:20px; bottom:20px; width:56px; height:56px; border-radius:50%;
+      background:var(--primary); color:white; border:none; box-shadow:0 8px 24px rgba(0,0,0,.15); cursor:pointer;
+      display:grid; place-items:center; font-size:28px;
+    }
+    .fab:focus-visible{ outline:3px solid #99f6e4; outline-offset:3px }
+    /* Modal */
+    .modal-backdrop{
+      position:fixed; inset:0; background:rgba(15,23,42,.55);
+      display:none; align-items:center; justify-content:center; padding:16px;
+      z-index: 100;
+    }
+    .modal{ width:100%; max-width:520px; background:var(--bg); border-radius:16px; border:1px solid var(--muted); padding:16px }
+    .modal h3{ margin:0 0 8px 0 }
+    .row{ display:grid; grid-template-columns: 1fr 1fr; gap:8px }
+    .field{ display:flex; flex-direction:column; gap:6px }
+    label{ font-size:14px }
+    input, select, textarea{
+      border:1px solid var(--muted); border-radius:10px; padding:10px 12px; font:inherit; background:#f8fafc;
+    }
+    textarea{ min-height:80px; resize:vertical }
+    .actions{ display:flex; justify-content:flex-end; gap:8px; margin-top:12px }
+    .btn{
+      border:1px solid var(--muted); background:#f8fafc; padding:10px 12px; border-radius:10px; cursor:pointer;
+    }
+    .btn.primary{ background:var(--primary); color:white; border-color:transparent }
+    /* Drawer for patient details */
+    .drawer{
+      position:fixed; right:0; top:0; bottom:0; width:380px; max-width:100%;
+      background:var(--bg); border-left:1px solid var(--muted);
+      transform:translateX(100%); transition:transform .25s ease; box-shadow:-12px 0 24px rgba(0,0,0,.08);
+      display:flex; flex-direction:column;
+      z-index: 50;
+    }
+    .drawer.open{ transform:translateX(0) }
+    .drawer header{
+      display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--muted);
+    }
+    .drawer main{ padding:12px 16px; overflow:auto }
+    .pill{ display:inline-block; padding:4px 8px; border-radius:999px; background:#ecfeff; color:#0e7490; border:1px solid #cffafe; font-size:12px }
+    /* Toast */
+    .toast{
+      position:fixed; left:50%; transform:translateX(-50%); bottom:88px; background:var(--fg); color:white; padding:10px 14px; border-radius:999px; display:none;
+    }
+    .empty{
+      padding:16px; text-align:center; color:#64748b; border-top:1px dashed var(--muted);
+    }
+    /* Patient Details Popup */
+    .details-modal {
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      background: var(--bg);
+      border-radius: 16px;
+      border: 1px solid var(--muted);
+      padding: 20px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .details-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+    .details-title {
+      margin: 0;
+      font-size: 20px;
+      color: var(--fg);
+    }
+    .details-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      overflow: hidden;
+    }
+    .details-section {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .details-section h4 {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      color: #475569;
+    }
+    .details-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+    .details-item .label {
+      color: #64748b;
+    }
+    .details-item .value {
+      color: var(--fg);
+      text-align: right;
+      font-weight: 500;
+    }
+    .therapy-list, .medicine-list {
+      margin-top: 8px;
+    }
+    .therapy-item, .medicine-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 14px;
+    }
+    .therapy-item:last-child, .medicine-item:last-child {
+      border-bottom: none;
+    }
+    .details-actions {
+      margin-top: 16px;
+      display: flex;
+      justify-content: flex-end;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" role="application" aria-label="Doctor dashboard">
+    <header class="topbar" aria-label="Header">
+      <div class="doc">
+        <div class="avatar" aria-hidden="true"></div>
+        <div>
+          <h1 class="text-balance">Dr. Aanya Mehta</h1>
+          <p>General Physician • Reg. No. MH-12345</p>
+        </div>
+      </div>
+      <div class="searchbar" role="search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 21l-3.8-3.8M10.8 18.6a7.8 7.8 0 1 1 0-15.6 7.8 7.8 0 0 1 0 15.6z" stroke="#64748b" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="search" placeholder="Search patient or reason…" aria-label="Search appointments"/>
+      </div>
+    </header>
+
+    <section class="content" aria-label="Main content">
+      <div class="card" aria-labelledby="sched-h">
+        <div class="card-head">
+          <h2 id="sched-h">Today’s Schedule</h2>
+          <span class="pill" id="countPill">0 appointments</span>
+        </div>
+        <div id="slots" class="slots" role="list"></div>
+        <div id="emptyState" class="empty" hidden>No appointments yet. Use the + button to add one.</div>
+      </div>
+
+      <aside class="widget" aria-labelledby="stats-h">
+        <h3 id="stats-h" style="margin:0">Quick Stats</h3>
+        <div class="mini-list">
+          <div class="mini-item"><span>Checked-in</span><span id="statIn">0</span></div>
+          <div class="mini-item"><span>Completed</span><span id="statDone">0</span></div>
+          <div class="mini-item"><span>Cancelled</span><span id="statCancel">0</span></div>
+        </div>
+        <hr style="border:none; border-top:1px dashed var(--muted); margin:12px 0" />
+        <h4 style="margin:0 0 6px 0">Next patient</h4>
+        <div id="nextPatient" style="font-size:14px; color:#475569">—</div>
+      </aside>
+    </section>
+  </div>
+
+   Floating Add 
+  <button class="fab" id="addBtn" aria-label="Add new patient appointment">+</button>
+
+   Add Modal 
+  <div class="modal-backdrop" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal">
+      <h3 id="modal-title">Add Patient Appointment</h3>
+      <div class="row">
+        <div class="field">
+          <label for="fName">Patient name</label>
+          <input id="fName" placeholder="e.g., Rohan Shah" />
+        </div>
+        <div class="field">
+          <label for="fTime">Time</label>
+          <input id="fTime" type="time" value="09:00"/>
+        </div>
+        <div class="field">
+          <label for="fReason">Reason / Notes</label>
+          <input id="fReason" placeholder="Fever, follow-up, etc." />
+        </div>
+        <div class="field">
+          <label for="fStatus">Status</label>
+          <select id="fStatus">
+            <option value="Scheduled">Scheduled</option>
+            <option value="Checked-in">Checked-in</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="cancelAdd">Cancel</button>
+        <button class="btn primary" id="saveAdd">Save</button>
+      </div>
+    </div>
+  </div>
+
+   Patient Drawer 
+  <section class="drawer" id="drawer" aria-hidden="true">
+    <header>
+      <strong id="drawerName">Patient</strong>
+      <button class="btn" id="closeDrawer" aria-label="Close details">Close</button>
+    </header>
+    <main>
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px">
+        <span class="pill" id="drawerTime">—</span>
+        <span class="pill" id="drawerStatus">—</span>
+      </div>
+      <p id="drawerReason" style="margin-top:0">—</p>
+      <hr style="border:none; border-top:1px dashed var(--muted); margin:12px 0" />
+      <h4 style="margin:0 0 8px 0">Quick actions</h4>
+      <div style="display:flex; gap:8px; flex-wrap:wrap">
+        <button class="btn" id="markIn">Mark Checked-in</button>
+        <button class="btn" id="markDone">Mark Completed</button>
+        <button class="btn" id="markCancel">Cancel</button>
+        <button class="btn" id="viewDetails">Patient Details</button>
+        <button class="btn" id="deleteAppt" style="margin-left:auto; border-color:#fecaca; background:#fff1f2; color:#b91c1c">Delete</button>
+      </div>
+    </main>
+  </section>
+
+  <!-- Patient Details Modal -->
+  <div class="modal-backdrop" id="detailsModal" role="dialog" aria-modal="true" aria-labelledby="details-title">
+    <div class="details-modal">
+      <div class="details-header">
+        <h3 id="details-title" class="details-title">Patient Details</h3>
+        <button class="btn" id="closeDetails" aria-label="Close details">×</button>
+      </div>
+      <div class="details-content">
+        <div class="details-section">
+          <h4>Appointment Information</h4>
+          <div class="details-item">
+            <span class="label">Patient:</span>
+            <span class="value" id="detailName">—</span>
+          </div>
+          <div class="details-item">
+            <span class="label">Day of Visit:</span>
+            <span class="value" id="detailDay">—</span>
+          </div>
+          <div class="details-item">
+            <span class="label">Visit Number:</span>
+            <span class="value" id="detailVisitCount">—</span>
+          </div>
+          <div class="details-item">
+            <span class="label">Time:</span>
+            <span class="value" id="detailTime">—</span>
+          </div>
+          <div class="details-item">
+            <span class="label">Reason:</span>
+            <span class="value" id="detailReason">—</span>
+          </div>
+        </div>
+        
+        <div class="details-section">
+          <h4>Medical Information</h4>
+          <div class="details-item">
+            <span class="label">Primary Condition:</span>
+            <span class="value" id="detailPrimaryCondition">—</span>
+          </div>
+          <div class="details-item">
+            <span class="label">Other Conditions:</span>
+            <span class="value" id="detailOtherConditions">—</span>
+          </div>
+        </div>
+        
+        <div class="details-section">
+          <h4>Current Therapy</h4>
+          <div class="therapy-list" id="detailTherapy">
+            <div class="therapy-item">
+              <span>Medication</span>
+              <span>—</span>
+            </div>
+            <div class="therapy-item">
+              <span>Frequency</span>
+              <span>—</span>
+            </div>
+            <div class="therapy-item">
+              <span>Duration</span>
+              <span>—</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="details-section">
+          <h4>Medications</h4>
+          <div class="medicine-list" id="detailMedicines">
+            <div class="medicine-item">
+              <span>—</span>
+              <span>—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="details-actions">
+        <button class="btn primary" id="editDetails">Edit Details</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // Minimal store with localStorage persistence
+    const STORAGE_KEY = "doctor-dashboard-appointments-v1";
+    const state = {
+      appointments: load() ?? seed(),
+      selectedId: null,
+      get selected(){ return this.appointments.find(a => a.id === this.selectedId) || null; }
+    };
+
+    function seed(){
+      return [
+        { 
+          id:id(), 
+          time:"09:00", 
+          name:"Priya Nair", 
+          reason:"Annual checkup", 
+          status:"Scheduled",
+          details: {
+            day: "Monday",
+            visitCount: "3rd visit",
+            primaryCondition: "Hypertension",
+            otherConditions: "Type 2 Diabetes, Hyperlipidemia",
+            therapy: [
+              { type: "Medication", value: "Lisinopril 10mg" },
+              { type: "Frequency", value: "Once daily" },
+              { type: "Duration", value: "Ongoing" }
+            ],
+            medicines: [
+              { name: "Lisinopril", dosage: "10mg daily" },
+              { name: "Metformin", dosage: "500mg twice daily" },
+              { name: "Atorvastatin", dosage: "20mg at bedtime" }
+            ]
+          }
+        },
+        { 
+          id:id(), 
+          time:"10:30", 
+          name:"Aman Verma", 
+          reason:"Fever and cough", 
+          status:"Checked-in",
+          details: {
+            day: "Monday",
+            visitCount: "1st visit",
+            primaryCondition: "Upper respiratory infection",
+            otherConditions: "None",
+            therapy: [
+              { type: "Medication", value: "Amoxicillin 500mg" },
+              { type: "Frequency", value: "Three times daily" },
+              { type: "Duration", value: "7 days" }
+            ],
+            medicines: [
+              { name: "Amoxicillin", dosage: "500mg three times daily" },
+              { name: "Ibuprofen", dosage: "400mg as needed" }
+            ]
+          }
+        },
+        { 
+          id:id(), 
+          time:"12:00", 
+          name:"Neha Gupta", 
+          reason:"Follow-up", 
+          status:"Scheduled",
+          details: {
+            day: "Monday",
+            visitCount: "5th visit",
+            primaryCondition: "Migraine",
+            otherConditions: "None",
+            therapy: [
+              { type: "Medication", value: "Sumatriptan 50mg" },
+              { type: "Frequency", value: "As needed" },
+              { type: "Duration", value: "Ongoing" }
+            ],
+            medicines: [
+              { name: "Sumatriptan", dosage: "50mg as needed" },
+              { name: "Propranolol", dosage: "40mg daily" }
+            ]
+          }
+        },
+      ];
+    }
+    function id(){ return Math.random().toString(36).slice(2,9); }
+    function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state.appointments)); }
+    function load(){
+      try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || "null"); }catch{ return null; }
+    }
+
+    // Elements
+    const slotsEl = document.getElementById("slots");
+    const pillEl = document.getElementById("countPill");
+    const emptyEl = document.getElementById("emptyState");
+    const searchEl = document.getElementById("search");
+    const statsIn = document.getElementById("statIn");
+    const statsDone = document.getElementById("statDone");
+    const statsCancel = document.getElementById("statCancel");
+    const nextPatient = document.getElementById("nextPatient");
+
+    // Modal
+    const modal = document.getElementById("modal");
+    const addBtn = document.getElementById("addBtn");
+    const cancelAdd = document.getElementById("cancelAdd");
+    const saveAdd = document.getElementById("saveAdd");
+    const fName = document.getElementById("fName");
+    const fTime = document.getElementById("fTime");
+    const fReason = document.getElementById("fReason");
+    const fStatus = document.getElementById("fStatus");
+
+    // Drawer
+    const drawer = document.getElementById("drawer");
+    const closeDrawer = document.getElementById("closeDrawer");
+    const drawerName = document.getElementById("drawerName");
+    const drawerTime = document.getElementById("drawerTime");
+    const drawerStatus = document.getElementById("drawerStatus");
+    const drawerReason = document.getElementById("drawerReason");
+    const markIn = document.getElementById("markIn");
+    const markDone = document.getElementById("markDone");
+    const markCancel = document.getElementById("markCancel");
+    const viewDetails = document.getElementById("viewDetails");
+    const deleteAppt = document.getElementById("deleteAppt");
+    
+    // Patient Details Modal
+    const detailsModal = document.getElementById("detailsModal");
+    const closeDetails = document.getElementById("closeDetails");
+    const detailName = document.getElementById("detailName");
+    const detailDay = document.getElementById("detailDay");
+    const detailVisitCount = document.getElementById("detailVisitCount");
+    const detailTime = document.getElementById("detailTime");
+    const detailReason = document.getElementById("detailReason");
+    const detailPrimaryCondition = document.getElementById("detailPrimaryCondition");
+    const detailOtherConditions = document.getElementById("detailOtherConditions");
+    const detailTherapy = document.getElementById("detailTherapy");
+    const detailMedicines = document.getElementById("detailMedicines");
+    const editDetails = document.getElementById("editDetails");
+
+    const toast = document.getElementById("toast");
+    function showToast(msg){
+      toast.textContent = msg;
+      toast.style.display = "block";
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(()=> toast.style.display = "none", 1600);
+    }
+
+    function render(list = state.appointments){
+      const term = (searchEl.value || "").toLowerCase().trim();
+      const filtered = list
+        .slice()
+        .sort((a,b)=> a.time.localeCompare(b.time))
+        .filter(a => a.name.toLowerCase().includes(term) || a.reason.toLowerCase().includes(term) || a.time.includes(term));
+
+      slotsEl.innerHTML = "";
+      filtered.forEach(a=>{
+        const li = document.createElement("div");
+        li.className = "slot";
+        li.role = "listitem";
+        li.dataset.id = a.id;
+        li.innerHTML = `
+          <div class="time">${a.time}</div>
+          <div class="patient">
+            <span class="name">${a.name}</span>
+            <span class="reason">${a.reason}</span>
+          </div>
+          <span class="status">${a.status}</span>
+        `;
+        li.addEventListener("click", ()=> openDrawer(a.id));
+        slotsEl.appendChild(li);
+      });
+
+      emptyEl.hidden = filtered.length !== 0;
+      pillEl.textContent = `${filtered.length} appointment${filtered.length===1?"":"s"}`;
+
+      // Stats
+      statsIn.textContent = state.appointments.filter(a=>a.status==="Checked-in").length;
+      statsDone.textContent = state.appointments.filter(a=>a.status==="Completed").length;
+      statsCancel.textContent = state.appointments.filter(a=>a.status==="Cancelled").length;
+      const next = state.appointments
+        .filter(a=> a.status !== "Completed" && a.status !== "Cancelled")
+        .sort((a,b)=> a.time.localeCompare(b.time))[0];
+      nextPatient.textContent = next ? `${next.time} — ${next.name}` : "—";
+    }
+
+    function openModal(){
+      modal.style.display = "flex";
+      fName.value = ""; fReason.value = ""; fTime.value = new Date().toTimeString().slice(0,5);
+      fStatus.value = "Scheduled";
+      modal.querySelector(".modal").focus();
+    }
+    function closeModal(){ modal.style.display = "none"; }
+
+    function openDrawer(id){
+      state.selectedId = id;
+      const a = state.selected;
+      if(!a) return;
+      drawerName.textContent = a.name;
+      drawerTime.textContent = a.time;
+      drawerStatus.textContent = a.status;
+      drawerReason.textContent = a.reason || "—";
+      
+      drawer.classList.add("open");
+      drawer.setAttribute("aria-hidden","false");
+    }
+    function closeDrawerFn(){
+      drawer.classList.remove("open");
+      drawer.setAttribute("aria-hidden","true");
+      state.selectedId = null;
+    }
+
+    function openDetailsModal(){
+      const a = state.selected;
+      if(!a) return;
+      
+      // Populate patient details
+      detailName.textContent = a.name;
+      detailTime.textContent = a.time;
+      detailReason.textContent = a.reason || "—";
+      
+      if (a.details) {
+        detailDay.textContent = a.details.day;
+        detailVisitCount.textContent = a.details.visitCount;
+        detailPrimaryCondition.textContent = a.details.primaryCondition;
+        detailOtherConditions.textContent = a.details.otherConditions;
+        
+        // Populate therapy
+        detailTherapy.innerHTML = '';
+        if (a.details.therapy && a.details.therapy.length) {
+          a.details.therapy.forEach(item => {
+            const therapyItem = document.createElement('div');
+            therapyItem.className = 'therapy-item';
+            therapyItem.innerHTML = `<span>${item.type}</span><span>${item.value}</span>`;
+            detailTherapy.appendChild(therapyItem);
+          });
+        }
+        
+        // Populate medicines
+        detailMedicines.innerHTML = '';
+        if (a.details.medicines && a.details.medicines.length) {
+          a.details.medicines.forEach(med => {
+            const medItem = document.createElement('div');
+            medItem.className = 'medicine-item';
+            medItem.innerHTML = `<span>${med.name}</span><span>${med.dosage}</span>`;
+            detailMedicines.appendChild(medItem);
+          });
+        }
+      }
+      
+      detailsModal.style.display = "flex";
+    }
+    
+    function closeDetailsModal(){
+      detailsModal.style.display = "none";
+    }
+
+    // Event bindings
+    addBtn.addEventListener("click", openModal);
+    cancelAdd.addEventListener("click", closeModal);
+    modal.addEventListener("click", (e)=> { if(e.target === modal) closeModal(); });
+    saveAdd.addEventListener("click", ()=>{
+      const name = fName.value.trim();
+      const time = fTime.value.trim();
+      if(!name || !time){ showToast("Name and time required"); return; }
+      
+      // Create a new appointment with default details
+      const newAppt = { 
+        id:id(), 
+        name, 
+        time, 
+        reason:fReason.value.trim(), 
+        status:fStatus.value,
+        details: {
+          day: new Date().toLocaleDateString('en-US', { weekday: 'long' }),
+          visitCount: "1st visit",
+          primaryCondition: "Not specified",
+          otherConditions: "None",
+          therapy: [
+            { type: "Therapy", value: "Not specified" }
+          ],
+          medicines: [
+            { name: "Medication", dosage: "Not specified" }
+          ]
+        }
+      };
+      
+      state.appointments.push(newAppt);
+      save(); closeModal(); render(); showToast("Appointment added");
+    });
+
+    closeDrawer.addEventListener("click", closeDrawerFn);
+    markIn.addEventListener("click", ()=> updateStatus("Checked-in"));
+    markDone.addEventListener("click", ()=> updateStatus("Completed"));
+    markCancel.addEventListener("click", ()=> updateStatus("Cancelled"));
+    viewDetails.addEventListener("click", openDetailsModal);
+    deleteAppt.addEventListener("click", ()=>{
+      if(!state.selected) return;
+      state.appointments = state.appointments.filter(a=> a.id !== state.selectedId);
+      save(); closeDrawerFn(); render(); showToast("Appointment deleted");
+    });
+
+    closeDetails.addEventListener("click", closeDetailsModal);
+    detailsModal.addEventListener("click", (e)=> { if(e.target === detailsModal) closeDetailsModal(); });
+    editDetails.addEventListener("click", ()=> {
+      showToast("Edit functionality would be implemented here");
+    });
+
+    function updateStatus(status){
+      const a = state.selected;
+      if(!a) return;
+      a.status = status;
+      save();
+      drawerStatus.textContent = status;
+      render();
+      showToast(`Marked ${status.toLowerCase()}`);
+    }
+
+    searchEl.addEventListener("input", ()=> render());
+
+    // Initial render
+    render();
+  </script>
+</body>  
+</html>

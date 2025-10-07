@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AyurSutra</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0fdf4 100%);
+            min-height: 100vh;
+            color: #1f2937;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo i {
+            font-size: 2rem;
+            margin-right: 15px;
+            color: #10b981;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #10b981;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .progress-stepper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+            padding: 0 20px;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .step:not(:last-child)::after {
+            content: '';
+            width: 80px;
+            height: 2px;
+            background: #e5e7eb;
+            margin: 0 20px;
+        }
+
+        .step.completed::after {
+            background: #10b981;
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #6b7280;
+            margin-right: 10px;
+        }
+
+        .step.completed .step-circle {
+            background: #10b981;
+            color: white;
+        }
+
+        .step.active .step-circle {
+            background: #059669;
+            color: white;
+        }
+
+        .step-label {
+            font-weight: 500;
+            color: #6b7280;
+        }
+
+        .step.completed .step-label,
+        .step.active .step-label {
+            color: #059669;
+        }
+
+        .appointment-section {
+            display: none;
+        }
+
+        .appointment-section.active {
+            display: block;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+            padding: 25px 30px;
+            border-bottom: 2px solid #d1fae5;
+        }
+
+        .section-header h3 {
+            font-size: 1.4rem;
+            color: #065f46;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-header i {
+            margin-right: 12px;
+            color: #10b981;
+        }
+
+        .section-content {
+            padding: 30px;
+        }
+
+        .doctor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .doctor-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 15px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .doctor-card:hover {
+            border-color: #10b981;
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .doctor-card.selected {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .doctor-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .doctor-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #059669, #047857);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+
+        .doctor-info h4 {
+            font-size: 1.2rem;
+            color: #065f46;
+            margin-bottom: 5px;
+        }
+
+        .doctor-info .specialty {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .doctor-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stars {
+            color: #f59e0b;
+        }
+
+        .doctor-details {
+            margin-top: 15px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .calendar-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .calendar-sidebar {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            height: fit-content;
+        }
+
+        .calendar-main {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .month-nav {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            background: #f3f4f6;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #10b981;
+            color: white;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-top: 15px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .calendar-day.header {
+            font-weight: 600;
+            color: #6b7280;
+            cursor: default;
+        }
+
+        .calendar-day.available:hover {
+            background: #f0fdf4;
+            color: #065f46;
+        }
+
+        .calendar-day.selected {
+            background: #10b981;
+            color: white;
+        }
+
+        .calendar-day.unavailable {
+            color: #d1d5db;
+            cursor: not-allowed;
+        }
+
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .time-slot {
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .time-slot:hover {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .time-slot.selected {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+
+        .time-slot.booked {
+            background: #fef2f2;
+            border-color: #dc2626;
+            color: #dc2626;
+            cursor: not-allowed;
+        }
+
+        .appointment-summary {
+            background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+            border: 2px solid #10b981;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+
+        .summary-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .summary-header h4 {
+            color: #065f46;
+            font-size: 1.3rem;
+        }
+
+        .summary-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .summary-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .summary-item i {
+            color: #10b981;
+            margin-right: 10px;
+            width: 20px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(5, 150, 105, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .btn-outline {
+            background: white;
+            color: #059669;
+            border: 2px solid #059669;
+        }
+
+        .btn-outline:hover {
+            background: #059669;
+            color: white;
+        }
+
+        .alert {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .alert i {
+            color: #0ea5e9;
+            margin-right: 12px;
+            margin-top: 2px;
+        }
+
+        .alert.success {
+            background: #f0fdf4;
+            border-color: #16a34a;
+        }
+
+        .alert.success i {
+            color: #16a34a;
+        }
+
+        .consultation-type {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .consultation-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .consultation-card:hover {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .consultation-card.selected {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .consultation-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #10b981;
+        }
+
+        .price-tag {
+            background: #10b981;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .filter-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .confirmation-details {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .confirmation-icon {
+            width: 80px;
+            height: 80px;
+            background: #10b981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            color: white;
+            font-size: 2.5rem;
+        }
+
+        .appointment-card {
+            background: #f0fdf4;
+            border: 2px solid #10b981;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+
+        .appointment-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .detail-group {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+        }
+
+        .detail-group i {
+            color: #10b981;
+            margin-right: 12px;
+            width: 20px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .calendar-container {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .progress-stepper {
+                overflow-x: auto;
+                justify-content: flex-start;
+                padding-bottom: 10px;
+            }
+
+            .step:not(:last-child)::after {
+                width: 60px;
+                margin: 0 15px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-leaf"></i>
+                <h1>AyurSutra</h1>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <!-- Progress Stepper -->
+        <div class="progress-stepper">
+            <div class="step completed" id="step1">
+                <div class="step-circle">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="step-label">Assessment Complete</div>
+            </div>
+            <div class="step active" id="step2">
+                <div class="step-circle">2</div>
+                <div class="step-label">Select Organization</div>
+            </div>
+            <!-- <div class="step" id="step3">
+                <div class="step-circle">3</div>
+                <div class="step-label">Choose Date & Time</div>
+            </div> -->
+            <div class="step" id="step4">
+                <div class="step-circle">3</div>
+                <div class="step-label">Confirm Appointment</div>
+            </div>
+        </div>
+
+        <!-- Step 1: Consultation Type Selection -->
+        <div class="appointment-section active" id="consultationTypeSection">
+            <div class="form-card">
+                <div class="section-header">
+                    <h3><i class="fas fa-clipboard-list"></i> Select Consultation Type</h3>
+                </div>
+                <div class="section-content">
+                    <div class="alert">
+                        <i class="fas fa-info-circle"></i>
+                        <div>Based on your assessment, we recommend Panchakarma therapy. Please select your preferred consultation type:</div>
+                    </div>
+
+                    <div class="consultation-type">
+                        <div class="consultation-card" onclick="selectConsultationType('initial')">
+                            <div class="consultation-icon">
+                                <i class="fas fa-user-md"></i>
+                            </div>
+                            <h4>New Consultation</h4>
+                            <p>Comprehensive assessment with detailed Panchakarma treatment planning</p>
+                        </div>
+
+                        <div class="consultation-card" onclick="selectConsultationType('followup')">
+                            <div class="consultation-icon">
+                                <i class="fas fa-redo-alt"></i>
+                            </div>
+                            <h4>Follow-up Consultation</h4>
+                            <p>Progress review and treatment adjustment for existing patients</p>
+                        </div>
+
+                        <div class="consultation-card" onclick="selectConsultationType('emergency')">
+                            <div class="consultation-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <h4>Urgent Consultation</h4>
+                            <p>Same-day consultation for acute health concerns</p>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="nextStep('doctorSelection')" disabled id="proceedToDoctor">
+                            Next: Select Doctor <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Doctor Selection -->
+        <div class="appointment-section" id="doctorSelectionSection">
+            <div class="filter-section">
+                <h4><i class="fas fa-filter"></i> Filter Specialists</h4>
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label>Specialization</label>
+                        <select id="specializationFilter" onchange="filterDoctors()">
+                            <option value="">All Specializations</option>
+                            <option value="panchakarma">Panchakarma Specialist</option>
+                            <option value="general">General Ayurveda</option>
+                            <option value="women">Women's Health</option>
+                            <option value="pediatric">Pediatric Ayurveda</option>
+                            <option value="psychiatric">Mind Therapy (Satvavajaya)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Experience Level</label>
+                        <select id="experienceFilter" onchange="filterDoctors()">
+                            <option value="">Any Experience</option>
+                            <option value="senior">15+ years</option>
+                            <option value="experienced">8-15 years</option>
+                            <option value="mid">5-8 years</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Gender Preference</label>
+                        <select id="genderFilter" onchange="filterDoctors()">
+                            <option value="">No Preference</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-card">
+                <div class="section-header">
+                    <h3><i class="fas fa-user-md"></i> Available Ayurvedic Physicians</h3>
+                </div>
+                <div class="section-content">
+                    <div class="doctor-grid" id="doctorGrid">
+                        <!-- Doctors will be populated by JavaScript -->
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-secondary" onclick="previousStep('consultationType')">
+                            <i class="fas fa-arrow-left"></i> Previous
+                        </button>
+                        <button class="btn btn-primary" onclick="nextStep('dateTimeSelection')" disabled id="proceedToDateTime">
+                            Next: Select Date & Time <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Date & Time Selection -->
+        <div class="appointment-section" id="dateTimeSelectionSection">
+            <div class="form-card">
+                <div class="section-header">
+                    <h3><i class="fas fa-calendar-alt"></i> Select Appointment Date & Time</h3>
+                </div>
+                <div class="section-content">
+                    <div class="calendar-container">
+                        <div class="calendar-sidebar">
+                            <h4>Selected Doctor</h4>
+                            <div id="selectedDoctorInfo">
+                                <!-- Selected doctor info will be displayed here -->
+                            </div>
+                        </div>
+
+                        <div class="calendar-main">
+                            <div class="calendar-header">
+                                <h4 id="currentMonth">January 2025</h4>
+                                <div class="month-nav">
+                                    <button class="nav-btn" onclick="changeMonth(-1)">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <button class="nav-btn" onclick="changeMonth(1)">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="calendar-grid" id="calendarGrid">
+                                <!-- Calendar will be generated by JavaScript -->
+                            </div>
+
+                            <div id="timeSlotsContainer" class="hidden">
+                                <h4 style="margin-top: 30px; margin-bottom: 15px;">Available Time Slots</h4>
+                                <div class="time-slots" id="timeSlots">
+                                    <!-- Time slots will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-secondary" onclick="previousStep('doctorSelection')">
+                            <i class="fas fa-arrow-left"></i> Previous
+                        </button>
+                        <button class="btn btn-primary" onclick="nextStep('confirmation')" disabled id="proceedToConfirmation">
+                            Review Appointment <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 4: Confirmation -->
+        <div class="appointment-section" id="confirmationSection">
+            <div class="confirmation-details">
+                <div class="confirmation-icon">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <h2 style="color: #065f46; margin-bottom: 15px;">Confirm Your Appointment</h2>
+                <p style="color: #6b7280; margin-bottom: 30px;">Please review your appointment details before confirming</p>
+
+                <div class="appointment-card">
+                    <div class="appointment-details" id="appointmentDetails">
+                        <!-- Appointment details will be populated -->
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Additional Notes for Doctor</label>
+                    <textarea id="additionalNotes" placeholder="Any additional information you'd like to share with the doctor..."></textarea>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" onclick="previousStep('dateTimeSelection')">
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
+                    <button class="btn btn-outline" onclick="saveDraft()">
+                        <i class="fas fa-save"></i> Save as Draft
+                    </button>
+                    <button class="btn btn-primary" onclick="confirmAppointment()">
+                        <i class="fas fa-check"></i> Confirm Appointment
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Section -->
+        <div class="appointment-section" id="successSection">
+            <div class="confirmation-details">
+                <div class="confirmation-icon" style="background: #10b981;">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h2 style="color: #065f46; margin-bottom: 15px;">Appointment Confirmed!</h2>
+                <p style="color: #6b7280; margin-bottom: 30px;">Your Panchakarma consultation has been successfully booked</p>
+
+                <div class="alert success">
+                    <i class="fas fa-check-circle"></i>
+                    <div>
+                        <strong>Confirmation sent!</strong> You will receive appointment details via email and SMS. Please arrive 15 minutes early for your consultation.
+                    </div>
+                </div>
+
+                <div class="appointment-card" id="finalAppointmentDetails">
+                    <!-- Final appointment details -->
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="goToDashboard()">
+                        <i class="fas fa-home"></i> Go to Dashboard
+                    </button>
+                    <button class="btn btn-outline" onclick="downloadAppointment()">
+                        <i class="fas fa-download"></i> Download Appointment
+                    </button>
+                    <button class="btn btn-secondary" onclick="addToCalendar()">
+                        <i class="fas fa-calendar-plus"></i> Add to Calendar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let selectedConsultationType = '';
+        let selectedDoctor = null;
+        let selectedDate = '';
+        let selectedTime = '';
+        let currentMonth = 1;
+        let currentYear = 2025;
+
+        // Sample doctors data
+        const doctors = [
+            {
+                id: 1,
+                name: "Dr. Rajesh Sharma",
+                specialty: "Panchakarma Specialist",
+                experience: "20 years",
+                rating: 4.8,
+                reviews: 156,
+                languages: "Hindi, English, Sanskrit",
+                education: "BAMS, MD (Panchakarma)",
+                gender: "male",
+                availability: "Mon-Sat",
+            },
+            {
+                id: 2,
+                name: "Dr. Meera Patel",
+                specialty: "Women's Ayurvedic Health",
+                experience: "15 years",
+                rating: 4.9,
+                reviews: 203,
+                languages: "Hindi, English, Gujarati",
+                education: "BAMS, MD (Prasuti Tantra)",
+                gender: "female",
+                availability: "Mon-Fri",
+            },
+            {
+                id: 3,
+                name: "Dr. Amit Kumar",
+                specialty: "General Ayurveda & Panchakarma",
+                experience: "12 years",
+                rating: 4.7,
+                reviews: 89,
+                languages: "Hindi, English",
+                education: "BAMS, MD (Kayachikitsa)",
+                gender: "male",
+            }
+        ]

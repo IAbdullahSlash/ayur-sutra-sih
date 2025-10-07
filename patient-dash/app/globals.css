@@ -1,0 +1,182 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* brand + neutrals (exactly 5 colors total used across UI):
+     - Primary green        #0f766e
+     - Accent green         #16a34a
+     - Background/card      #ffffff
+     - Text (neutral)       #334155
+     - Border (neutral)     #e2e8f0
+  */
+  --background: #ffffff;
+  --foreground: #334155;
+
+  --card: #ffffff;
+  --card-foreground: #334155;
+
+  --popover: #ffffff;
+  --popover-foreground: #334155;
+
+  --primary: #0f766e; /* teal-700 */
+  --primary-foreground: #ffffff;
+
+  --secondary: #16a34a; /* emerald-600 (used sparingly as accent) */
+  --secondary-foreground: #ffffff;
+
+  --muted: #ffffff;
+  --muted-foreground: #334155;
+
+  --accent: #16a34a;
+  --accent-foreground: #ffffff;
+
+  --destructive: #e3342f;
+  --destructive-foreground: #ffffff;
+
+  --border: #e2e8f0;
+  --input: #ffffff;
+  --ring: #0f766e;
+
+  /* keep charts readable with brand-forward accents */
+  --chart-1: #16a34a;
+  --chart-2: #0f766e;
+  --chart-3: #1e40af;
+  --chart-4: #0ea5e9;
+  --chart-5: #f59e0b;
+
+  --radius: 0.5rem;
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: #334155;
+  --sidebar-primary: #0f766e;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #16a34a;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #e2e8f0;
+  --sidebar-ring: #0f766e;
+}
+
+.dark {
+  --background: #111827; /* slate-900 */
+  --foreground: #f9fafb; /* slate-50 */
+
+  --card: #1f2937; /* slate-800 */
+  --card-foreground: #f9fafb;
+
+  --popover: #1f2937;
+  --popover-foreground: #f9fafb;
+
+  --primary: #f59e0b; /* brighter amber for dark mode affordance */
+  --primary-foreground: #111827;
+
+  --secondary: #8b5cf6;
+  --secondary-foreground: #111827;
+
+  --muted: #374151; /* slate-700 */
+  --muted-foreground: #e5e7eb;
+
+  --accent: #8b5cf6;
+  --accent-foreground: #111827;
+
+  --destructive: #ef4444;
+  --destructive-foreground: #111827;
+
+  --border: #374151;
+  --input: #111827;
+  --ring: #f59e0b;
+
+  --chart-1: #8b5cf6;
+  --chart-2: #f59e0b;
+  --chart-3: #60a5fa;
+  --chart-4: #34d399;
+  --chart-5: #f87171;
+
+  --sidebar: #1f2937;
+  --sidebar-foreground: #f9fafb;
+  --sidebar-primary: #f59e0b;
+  --sidebar-primary-foreground: #111827;
+  --sidebar-accent: #8b5cf6;
+  --sidebar-accent-foreground: #111827;
+  --sidebar-border: #374151;
+  --sidebar-ring: #f59e0b;
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  /* green gradient top bar */
+  .topbar-gradient {
+    background-image: linear-gradient(90deg, #0f766e, #16a34a);
+    color: white;
+  }
+
+  /* airy app surface; subtle tint using primary with low alpha */
+  .app-surface {
+    background: radial-gradient(1200px 400px at 50% -150px, rgba(15, 118, 110, 0.06), transparent 70%);
+  }
+
+  /* frosted card look matching reference */
+  .frosted-card {
+    @apply rounded-2xl border border-border/80 bg-white/90 shadow-md backdrop-blur-sm;
+  }
+
+  /* soft section header bar */
+  .section-header {
+    @apply rounded-t-2xl border-b border-border/70 bg-secondary/5;
+  }
+
+  /* subtle inset divider utility */
+  .inset-divider {
+    box-shadow: inset 0 -1px 0 0 var(--color-border);
+  }
+}

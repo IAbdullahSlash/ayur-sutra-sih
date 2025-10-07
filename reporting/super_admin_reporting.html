@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Libraries for PDF and Excel export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tableexport@5.2.0/dist/js/tableexport.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'corporate-blue': '#4a72d1',
+                        'corporate-teal': '#00b894',
+                        'corporate-light-blue': '#a8b9e6',
+                        'corporate-light-gray': '#f4f7f9',
+                        'corporate-gray': '#6c757d',
+                        'corporate-dark': '#2c3e50',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+    </style>
+</head>
+<body class="flex min-h-screen text-corporate-dark">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-64 bg-white p-6 shadow-xl transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out z-50 fixed md:relative">
+        <div class="flex items-center space-x-3 mb-8">
+            <svg class="w-8 h-8 text-corporate-teal" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L12 19.25L14.25 17M12 4V19.25M15 13.5H9"></path></svg>
+            <span class="text-xl font-bold text-corporate-dark">Super Admin</span>
+        </div>
+        <nav class="space-y-3">
+            <a href="#" data-page="dashboard" class="nav-link flex items-center space-x-3 p-3 rounded-lg bg-corporate-blue text-white font-semibold shadow-md transition-transform duration-200 hover:scale-105">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m0 0l7-7 7 7m0 0l-7 7"></path></svg>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" data-page="users" class="nav-link flex items-center space-x-3 p-3 rounded-lg text-corporate-dark hover:bg-corporate-light-gray transition-colors duration-200">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                <span>Users/Clinics</span>
+            </a>
+            <a href="#" data-page="billing" class="nav-link flex items-center space-x-3 p-3 rounded-lg text-corporate-dark hover:bg-corporate-light-gray transition-colors duration-200">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 012-2h2a2 2 0 012 2v6m0 0a2 2 0 01-2 2H9a2 2 0 01-2-2m0 0V6a2 2 0 012-2h2a2 2 0 012 2v13M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span>Billing</span>
+            </a>
+            <a href="#" data-page="system-health" class="nav-link flex items-center space-x-3 p-3 rounded-lg text-corporate-dark hover:bg-corporate-light-gray transition-colors duration-200">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l-7 7 7 7"></path></svg>
+                <span>System Health</span>
+            </a>
+            <a href="#" data-page="settings" class="nav-link flex items-center space-x-3 p-3 rounded-lg text-corporate-dark hover:bg-corporate-light-gray transition-colors duration-200">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.468 9.248 5.425 8 5.5c-1.096.071-2.203.23-3.328.444C2.493 6.64 1.5 8.169 1.5 9.805v4.39c0 1.636.993 3.165 2.172 3.361.996.183 2.023.284 3.064.284 1.127 0 2.228-.094 3.29-.283 1.059-.19 2.083-.418 3.093-.653a15.704 15.704 0 003.551-.926c1.155-.371 2.247-.942 3.228-1.636"></path></svg>
+                <span>Settings</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6 md:p-10 bg-corporate-light-gray">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-6">
+            <h1 id="page-title" class="text-3xl font-bold text-corporate-dark">Dashboard</h1>
+            <div class="flex items-center space-x-4">
+                <button id="menu-btn" class="md:hidden p-2 rounded-lg text-corporate-dark bg-white hover:bg-corporate-light-gray transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+                <span class="font-semibold text-corporate-dark">Admin</span>
+                <div class="w-10 h-10 bg-corporate-light-blue text-white rounded-full flex items-center justify-center font-bold">SA</div>
+            </div>
+        </header>
+
+        <!-- Main content container -->
+        <div id="content-container">
+            <!-- Content will be injected here by JavaScript -->
+        </div>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const contentContainer = document.getElementById('content-container');
+            const pageTitle = document.getElementById('page-title');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sidebar = document.querySelector('aside');
+            const menuBtn = document.getElementById('menu-btn');
+            let myCharts = {};
+
+            renderPage('dashboard');
+
+            // Handle sidebar link clicks
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const page = e.currentTarget.dataset.page;
+                    renderPage(page);
+
+                    // Update active state
+                    updateSidebarActiveState(page);
+                    
+                    // Hide sidebar on mobile after clicking
+                    sidebar.classList.add('-translate-x-full');
+                });
+            });
+
+            menuBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('-translate-x-full');
+            });
+
+            function updateSidebarActiveState(activePage) {
+                 navLinks.forEach(l => {
+                    l.classList.remove('bg-corporate-blue', 'text-white');
+                    l.classList.add('text-corporate-dark', 'hover:bg-corporate-light-gray');
+                });
+
+                // Only set active state for links that exist in the sidebar
+                const activeLink = document.querySelector(`.nav-link[data-page="${activePage}"]`);
+                if (activeLink) {
+                    activeLink.classList.add('bg-corporate-blue', 'text-white');
+                    activeLink.classList.remove('text-corporate-dark', 'hover:bg-corporate-light-gray');
+                }
+            }
+
+
+            function renderPage(page) {
+                contentContainer.innerHTML = '';
+                for (let chart in myCharts) {
+                    if (myCharts[chart] && typeof myCharts[chart].destroy === 'function') {
+                        myCharts[chart].destroy();
+                    }
+                }
+                myCharts = {};
+
+                pageTitle.textContent = page.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+
+                switch (page) {
+                    case 'dashboard':
+                        renderDashboard();
+                        break;
+                    case 'users':
+                        renderUsers();
+                        break;
+                    case 'billing':
+                        renderBilling();
+                        break;
+                    case 'therapies':
+                        renderTherapies();
+                        break;
+                    case 'therapists':
+                        renderTherapists();
+                        break;
+                    case 'system-health':
+                        renderSystemHealth();
+                        break;
+                    case 'settings':
+                        renderSettings();
+                        break;
+                }
+            }
+
+            // Function to handle dashboard card clicks
+            function setupDashboardCardListeners() {
+                document.querySelectorAll('.dashboard-card').forEach(card => {
+                    card.addEventListener('click', (e) => {
+                        const page = e.currentTarget.dataset.page;
+                        if (page) {
+                            renderPage(page);
+                            // Highlight the corresponding sidebar link if it exists (e.g., 'users', 'billing')
+                            updateSidebarActiveState(page);
+                        }
+                    });
+                });
+            }
+
+            function renderDashboard() {
+                contentContainer.innerHTML = `
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <!-- Card 1: Active Clinics (Clickable to Users/Clinics list) -->
+                        <div data-page="users" class="dashboard-card bg-white p-6 rounded-2xl shadow-lg flex items-center space-x-4 cursor-pointer hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1">
+                            <div class="p-3 bg-corporate-light-blue text-corporate-blue rounded-xl">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h-10a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v12a2 2 0 01-2 2zM9 11l-2 2m0 0l2 2m-2-2l2-2"></path></svg>
+                            </div>
+                            <div>
+                                <div class="text-xl font-medium text-corporate-gray">Active Clinics</div>
+                                <div class="text-4xl font-bold text-corporate-dark">380</div>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Ongoing Therapies (Clickable to Therapies list, renamed from Total Patients Onboarded) -->
+                        <div data-page="therapies" class="dashboard-card bg-white p-6 rounded-2xl shadow-lg flex items-center space-x-4 cursor-pointer hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1">
+                            <div class="p-3 bg-corporate-teal-100 text-corporate-teal rounded-xl">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <div>
+                                <div class="text-xl font-medium text-corporate-gray">Ongoing Therapies</div>
+                                <div class="text-4xl font-bold text-corporate-dark">4,500</div>
+                            </div>
+                        </div>
+
+                        <!-- Card 3: Revenue (MRR) (Clickable to Billing list) -->
+                        <div data-page="billing" class="dashboard-card bg-white p-6 rounded-2xl shadow-lg flex items-center space-x-4 cursor-pointer hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1">
+                            <div class="p-3 bg-corporate-light-blue text-corporate-blue rounded-xl">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6m6 0a9 9 0 110-18 9 9 0 010 18z"></path></svg>
+                            </div>
+                            <div>
+                                <div class="text-xl font-medium text-corporate-gray">Revenue (MRR)</div>
+                                <div class="text-4xl font-bold text-corporate-dark">$150,000</div>
+                            </div>
+                        </div>
+
+                        <!-- Card 4: Active Therapists (Clickable to Therapists list) -->
+                        <div data-page="therapists" class="dashboard-card bg-white p-6 rounded-2xl shadow-lg flex items-center space-x-4 cursor-pointer hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1">
+                            <div class="p-3 bg-corporate-teal-100 text-corporate-teal rounded-xl">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <div>
+                                <div class="text-xl font-medium text-corporate-gray">Active Therapists</div>
+                                <div class="text-4xl font-bold text-corporate-dark">950</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                        <div class="bg-white p-6 rounded-2xl shadow-lg">
+                            <h2 class="text-xl font-semibold mb-4 text-corporate-dark">Growth Over Time</h2>
+                            <canvas id="growthChart"></canvas>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-lg flex flex-col items-center">
+                            <h2 class="text-xl font-semibold mb-4 text-corporate-dark">Revenue Breakdown</h2>
+                            <canvas id="revenueChart" class="max-w-xs"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+                        <h2 class="text-xl font-semibold mb-4 text-corporate-dark">Most Used Modules</h2>
+                        <canvas id="modulesChart"></canvas>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                        <div class="bg-white p-6 rounded-2xl shadow-lg">
+                            <h2 class="text-xl font-semibold mb-4 text-corporate-dark">Notifications & Updates</h2>
+                            <ul class="space-y-4">
+                                <li class="flex items-start space-x-3">
+                                    <div class="w-8 h-8 rounded-full bg-corporate-teal flex items-center justify-center text-white"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6m6 0a9 9 0 110-18 9 9 0 010 18z"></path></svg></div>
+                                    <div>
+                                        <p class="font-medium text-corporate-dark">New Clinic Signup: "Ayur Life Center"</p>
+                                        <p class="text-sm text-corporate-gray">Just signed up for a Premium Plan.</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start space-x-3">
+                                    <div class="w-8 h-8 rounded-full bg-corporate-light-blue flex items-center justify-center text-white"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+                                    <div>
+                                        <p class="font-medium text-corporate-dark">Subscription Expiring: "Heal & Harmony"</p>
+                                        <p class="text-sm text-corporate-gray">Subscription for Clinic ID: CL-045 expires in 7 days.</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start space-x-3">
+                                    <div class="w-8 h-8 rounded-full bg-corporate-teal flex items-center justify-center text-white"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div>
+                                    <div>
+                                        <p class="font-medium text-corporate-dark">New Support Ticket from Dr. Rao</p>
+                                        <p class="text-sm text-corporate-gray">High priority issue regarding a bug in the reporting module.</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-lg">
+                            <h2 class="text-xl font-semibold mb-4 text-corporate-dark">Export Business Reports</h2>
+                            <p class="text-corporate-gray mb-4">Generate and download high-level business reports for investors and stakeholders.</p>
+                            <div class="flex space-x-2">
+                                <button id="exportBusinessPdfBtn" class="bg-corporate-blue text-white px-4 py-2 rounded-lg font-medium transition-colors hover:bg-corporate-teal">Export PDF</button>
+                                <button id="exportBusinessExcelBtn" class="bg-corporate-blue text-white px-4 py-2 rounded-lg font-medium transition-colors hover:bg-corporate-teal">Export Excel</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                initializeDashboardCharts();
+                setupDashboardCardListeners(); // Setup listeners after content is rendered
+            }
+
+            function renderUsers() {
+                contentContainer.innerHTML = `
+                    <div class="bg-white p-6 rounded-2xl shadow-lg overflow-x-auto">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-semibold text-corporate-dark">Clinic & User Management</h2>
+                            <div class="flex space-x-2">
+                                <button id="downloadPdfBtn" class="bg-corporate-blue text-white px-4 py-2 rounded-lg font-medium transition-colors hover:bg-corporate-teal">Download PDF</button>
+                                <button id="exportExcelBtn" class="bg-corporate-blue text-white px-4 py-2 rounded-lg font-medium transition-colors hover:bg-corporate-teal">Export Excel</button>
+                            </div>
+                        </div>
+                        <table id="usersTable" class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-corporate-light-gray">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-corporate-gray">Clinic/Hospital</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-corporate-gray">Status</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-corporate-gray">Plan</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-corporate-gray">Last Login</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-corporate-gray">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <!-- Increased Mock Data for Clinics/Users -->
+                                <tr><td class="px-6 py-4 whitespace-nowrap">Ayur Life Center</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-corporate-teal text-white">Active</span></td><td class="px-6 py-4 whitespace-nowrap">Premium</td><td class="px-6 py-4 whitespace-nowrap">2025-09-29</td><td class="px-6 py-4 whitespace-nowrap"><button class="text-corporate-blue hover:text-red-600">Deactivate</button></td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">Heal & Harmony Clinic</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-corporate-teal text-white">Active</span></td><td class="px-6 py-4 whitespace-nowrap">Standard</td><td class="px-6 py-4 whitespace-nowrap">2025-09-28</td><td class="px-6 py-4 whitespace-nowrap"><button class="text-corporate-blue hover:text-red-600">Deactivate</button></td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">Wellness Haven</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Inactive</span></td><td class="px-6 py-4 whitespace-nowrap">Free</td><td class="px-6 py-4 whitespace-nowrap">2025-09-20</td><td class="px-6 py-4 whitespace-nowrap"><button class="text-corporate-blue hover:text-green-600">Activate</button></td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">Holistic Health Hub</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-corporate-teal text-white">Active</span></td><td class="px-6 py-4 whitespace-nowrap">Premium</td><td class="px-6 py-4 whitespace-nowrap">2025-09-29</td><td class="px-6 py-4 whitespace-nowrap"><button class="text-corporate-blue hover:text-red-600">Deactivate</button></td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">The Dosha Center</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-corporate-teal text-white">Active</span></td><td class="px-6 py-4 whitespace-nowrap">Standard</td><td class="px-6 py-4 whitespace-nowrap">2025-09-25</td><td class="px-6 py-4 whitespace-nowrap"><button class="text-corporate-blue hover:text-red-600">Deactivate</button></td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">Veda Hospital</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Suspended</span></td><td class="px-6 py-4 whitespace-nowrap">Premium</td><td class="px-6 py-4 whitespace-nowrap">2025-08-01</td><td class="px-6 py-4 whitespace-nowrap"><button class="text-corporate-blue hover:text-green-600">Activate</button></td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">Prakriti Clinic</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-corporate-teal text-white">Active</span></td><td class="px-6 py-4 whitespace-nowrap">Premium</td><td class="px-6 py-4 whitespace-nowrap">2025-09-29</td><td class="px-6 py-4 whitespace-nowrap"><button class="text-corporate-blue hover:text-red-600">Deactivate</button></td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">Zenith Ayurveda</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-corporate-teal text-white">Active</span></td><td class="px-6 py-4 whitespace-nowrap">Standard</td><td class="px-6 py-4 whitespace-nowrap">2025-09-27</td><td class="px-6 py-4 whitespace-nowrap"><button class="text-corporate-blue hover:text-red-600">Deactivate</button></td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">Kaya Kalp Center</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Inactive</span></td><td class="px-6 py-4 whitespace-nowrap">Free</td><td class="px-6 py-4 whitespace-nowrap">2025-07-10</td><td class="px-6 py-4 whitespace-nowrap"><button class="text-corporate-blue hover:text-green-600">Activate</button></td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">Sarva Health</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-corporate-teal text-white">Active</span></td><td class="px-6 py-4 whitespace-nowrap">Premium</td><td class="px-6 py-4 whitespace-nowrap">2025-09-29</td><td class="px-6 py-4 whitespace-nowrap"><button class="text-corporate-blue hover:text-red-600">Deactivate</button></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                setupExportButtons('usersTable');
+            }
+
+            function renderBilling() {
+                contentContainer.innerHTML = `
+                    <div class="bg-white p-6 rounded-2xl shadow-lg overflow-x-auto">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-semibold text-corporate-dark">Billing Overview (MRR Details)</h2>
+                            <div class="flex space-x-2">
+                                <button id="downloadPdfBtn" class="bg-corporate-blue text-white px-4 py-2 rounded-lg font-medium transition-colors hover:bg-corporate-teal">Download PDF</button>
+                                <button id="exportExcelBtn" class="bg-corporate-blue text-white px-4 py-2 rounded-lg font-medium transition-colors hover:bg-corporate-teal">Export Excel</button>
+                            </div>
+                        </div>
+                        <table id="billingTable" class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-corporate-light-gray">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-corporate-gray">Invoice ID</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-corporate-gray">Clinic</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-corporate-gray">Amount</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-corporate-gray">Status</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-corporate-gray">Due Date</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <!-- Increased Mock Data for Billing -->
+                                <tr><td class="px-6 py-4 whitespace-nowrap">INV-9880</td><td class="px-6 py-4 whitespace-nowrap">Ayur Life Center</td><td class="px-6 py-4 whitespace-nowrap">$250.00</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-corporate-teal text-white">Paid</span></td><td class="px-6 py-4 whitespace-nowrap">2025-09-25</td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">INV-9879</td><td class="px-6 py-4 whitespace-nowrap">Heal & Harmony Clinic</td><td class="px-6 py-4 whitespace-nowrap">$150.00</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Overdue</span></td><td class="px-6 py-4 whitespace-nowrap">2025-09-15</td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">INV-9878</td><td class="px-6 py-4 whitespace-nowrap">Holistic Health Hub</td><td class="px-6 py-4 whitespace-nowrap">$250.00</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-corporate-teal text-white">Paid</span></td><td class="px-6 py-4 whitespace-nowrap">2025-09-22</td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">INV-9877</td><td class="px-6 py-4 whitespace-nowrap">Prakriti Clinic</td><td class="px-6 py-4 whitespace-nowrap">$250.00</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-corporate-teal text-white">Paid</span></td><td class="px-6 py-4 whitespace-nowrap">2025-09-18</td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">INV-9876</td><td class="px-6 py-4 whitespace-nowrap">Zenith Ayurveda</td><td class="px-6 py-4 whitespace-nowrap">$150.00</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span></td><td class="px-6 py-4 whitespace-nowrap">2025-10-05</td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">INV-9875</td><td class="px-6 py-4 whitespace-nowrap">Sarva Health</td><td class="px-6 py-4 whitespace-nowrap">$250.00</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-corporate-teal text-white">Paid</span></td><td class="px-6 py-4 whitespace-nowrap">2025-09-01</td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">INV-9874</td><td class="px-6 py-4 whitespace-nowrap">The Dosha Center</td><td class="px-6 py-4 whitespace-nowrap">$150.00</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-corporate-teal text-white">Paid</span></td><td class="px-6 py-4 whitespace-nowrap">2025-08-28</td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">INV-9873</td><td class="px-6 py-4 whitespace-nowrap">Veda Hospital</td><td class="px-6 py-4 whitespace-nowrap">$250.00</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Overdue</span></td><td class="px-6 py-4 whitespace-nowrap">2025-08-15</td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">INV-9872</td><td class="px-6 py-4 whitespace-nowrap">Kaya Kalp Center</td><td class="px-6 py-4 whitespace-nowrap">$50.00</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-corporate-teal text-white">Paid</span></td><td class="px-6 py-4 whitespace-nowrap">2025-09-10</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                setupExportButtons('billingTable');
+            }
+
+            function renderTherapies() {
+                 contentContainer.innerHTML = `
+                    <div class="bg-white p-6 rounded-2xl shadow-lg overflow-x-auto">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-semibold text-corporate-dark">Ongoing Therapies Details</h2>
+                            <div class="flex space-x-2">
+                                <button id="downloadPdfBtn" class="bg-corporate-blue text-white px-4 py-2 rounded-lg font-medium transition-colors hover:bg-corporate-teal">Download PDF</button>
+                                <button id="exportExcelBtn" class="bg-corporate-blue text-white px-4 py-2 rounded-lg font-medium transition-colors hover:bg-corporate-teal">Export Excel</button>
+                            </div>
+                        </div>
+                        <table id="therapiesTable" class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-corporate-light-gray">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-corporate-gray">Therapy ID</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-corporate-gray">Patient Name</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-corporate-gray">Clinic</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-corporate-gray">Therapist</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-corporate-gray">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <!-- Increased Mock Data for Therapies -->
+                                <tr><td class="px-6 py-4 whitespace-nowrap">T-1008</td><td class="px-6 py-4 whitespace-nowrap">Ravi Sharma</td><td class="px-6 py-4 whitespace-nowrap">Ayur Life Center</td><td class="px-6 py-4 whitespace-nowrap">Dr. Anil V.</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">In Progress</span></td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">T-1007</td><td class="px-6 py-4 whitespace-nowrap">Priya K.</td><td class="px-6 py-4 whitespace-nowrap">Heal & Harmony Clinic</td><td class="px-6 py-4 whitespace-nowrap">Dr. Smitha N.</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">In Progress</span></td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">T-1006</td><td class="px-6 py-4 whitespace-nowrap">Jatin D.</td><td class="px-6 py-4 whitespace-nowrap">Holistic Health Hub</td><td class="px-6 py-4 whitespace-nowrap">Dr. Anil V.</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-corporate-teal text-white">Completed</span></td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">T-1005</td><td class="px-6 py-4 whitespace-nowrap">Anjali M.</td><td class="px-6 py-4 whitespace-nowrap">Prakriti Clinic</td><td class="px-6 py-4 whitespace-nowrap">Dr. Rina P.</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">In Progress</span></td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">T-1004</td><td class="px-6 py-4 whitespace-nowrap">Vijay S.</td><td class="px-6 py-4 whitespace-nowrap">Zenith Ayurveda</td><td class="px-6 py-4 whitespace-nowrap">Dr. Vikas J.</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">In Progress</span></td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">T-1003</td><td class="px-6 py-4 whitespace-nowrap">Sanjay G.</td><td class="px-6 py-4 whitespace-nowrap">Sarva Health</td><td class="px-6 py-4 whitespace-nowrap">Dr. Anil V.</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-corporate-teal text-white">Completed</span></td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">T-1002</td><td class="px-6 py-4 whitespace-nowrap">Leena B.</td><td class="px-6 py-4 whitespace-nowrap">The Dosha Center</td><td class="px-6 py-4 whitespace-nowrap">Dr. Smitha N.</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">In Progress</span></td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">T-1001</td><td class="px-6 py-4 whitespace-nowrap">Kiran W.</td><td class="px-6 py-4 whitespace-nowrap">Kaya Kalp Center</td><td class="px-6 py-4 whitespace-nowrap">Dr. Rina P.</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">In Progress</span></td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">T-1000</td><td class="px-6 py-4 whitespace-nowrap">Deepak P.</td><td class="px-6 py-4 whitespace-nowrap">Veda Hospital</td><td class="px-6 py-4 whitespace-nowrap">Dr. Vikas J.</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-corporate-teal text-white">Completed</span></td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">T-0999</td><td class="px-6 py-4 whitespace-nowrap">Nisha H.</td><td class="px-6 py-4 whitespace-nowrap">Wellness Haven</td><td class="px-6 py-4 whitespace-nowrap">Dr. Anil V.</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">In Progress</span></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                setupExportButtons('therapiesTable');
+            }
+
+            function renderTherapists() {
+                 contentContainer.innerHTML = `
+                    <div class="bg-white p-6 rounded-2xl shadow-lg overflow-x-auto">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-semibold text-corporate-dark">Active Therapists Details</h2>
+                            <div class="flex space-x-2">
+                                <button id="downloadPdfBtn" class="bg-corporate-blue text-white px-4 py-2 rounded-lg font-medium transition-colors hover:bg-corporate-teal">Download PDF</button>
+                                <button id="exportExcelBtn" class="bg-corporate-blue text-white px-4 py-2 rounded-lg font-medium transition-colors hover:bg-corporate-teal">Export Excel</button>
+                            </div>
+                        </div>
+                        <table id="therapistsTable" class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-corporate-light-gray">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-corporate-gray">Therapist Name</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-corporate-gray">Primary Clinic</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-corporate-gray">Patients Managed</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-corporate-gray">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <!-- Increased Mock Data for Therapists -->
+                                <tr><td class="px-6 py-4 whitespace-nowrap">Dr. Anil V.</td><td class="px-6 py-4 whitespace-nowrap">Ayur Life Center</td><td class="px-6 py-4 whitespace-nowrap">45</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-corporate-teal text-white">Active</span></td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">Dr. Smitha N.</td><td class="px-6 py-4 whitespace-nowrap">Heal & Harmony Clinic</td><td class="px-6 py-4 whitespace-nowrap">32</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-corporate-teal text-white">Active</span></td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">Dr. Rao R.</td><td class="px-6 py-4 whitespace-nowrap">Wellness Haven</td><td class="px-6 py-4 whitespace-nowrap">55</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">On Leave</span></td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">Dr. Rina P.</td><td class="px-6 py-4 whitespace-nowrap">Prakriti Clinic</td><td class="px-6 py-4 whitespace-nowrap">48</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-corporate-teal text-white">Active</span></td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">Dr. Vikas J.</td><td class="px-6 py-4 whitespace-nowrap">Zenith Ayurveda</td><td class="px-6 py-4 whitespace-nowrap">40</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-corporate-teal text-white">Active</span></td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">Dr. Meera S.</td><td class="px-6 py-4 whitespace-nowrap">Sarva Health</td><td class="px-6 py-4 whitespace-nowrap">61</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-corporate-teal text-white">Active</span></td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">Dr. Rohan L.</td><td class="px-6 py-4 whitespace-nowrap">The Dosha Center</td><td class="px-6 py-4 whitespace-nowrap">39</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-corporate-teal text-white">Active</span></td></tr>
+                                <tr><td class="px-6 py-4 whitespace-nowrap">Dr. Neha T.</td><td class="px-6 py-4 whitespace-nowrap">Veda Hospital</td><td class="px-6 py-4 whitespace-nowrap">50</td><td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-corporate-teal text-white">Active</span></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                setupExportButtons('therapistsTable');
+            }
+
+            function renderSystemHealth() {
+                contentContainer.innerHTML = `
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white p-6 rounded-2xl shadow-lg">
+                            <h2 class="text-xl font-semibold mb-4 text-corporate-dark">Server Uptime & Performance</h2>
+                            <div class="flex items-center space-x-4 mb-4">
+                                <span class="w-16 h-16 rounded-full bg-corporate-teal flex items-center justify-center text-white font-bold text-lg">99.9%</span>
+                                <p class="text-corporate-gray">All servers are operational and performing optimally. Last check: a few seconds ago.</p>
+                            </div>
+                            <div class="bg-gray-100 p-4 rounded-lg">
+                                <h3 class="font-medium text-corporate-dark mb-2">Latency History</h3>
+                                <div class="h-24 bg-gray-200 rounded-lg flex items-end justify-between overflow-hidden">
+                                    <div class="bg-corporate-teal h-16 w-4 rounded-sm transition-all duration-300 transform hover:scale-110"></div>
+                                    <div class="bg-corporate-teal h-12 w-4 rounded-sm transition-all duration-300 transform hover:scale-110"></div>
+                                    <div class="bg-corporate-teal h-20 w-4 rounded-sm transition-all duration-300 transform hover:scale-110"></div>
+                                    <div class="bg-corporate-teal h-10 w-4 rounded-sm transition-all duration-300 transform hover:scale-110"></div>
+                                    <div class="bg-corporate-teal h-18 w-4 rounded-sm transition-all duration-300 transform hover:scale-110"></div>
+                                    <div class="bg-corporate-teal h-14 w-4 rounded-sm transition-all duration-300 transform hover:scale-110"></div>
+                                    <div class="bg-corporate-teal h-22 w-4 rounded-sm transition-all duration-300 transform hover:scale-110"></div>
+                                </div>
+                                <p class="text-sm text-center text-corporate-gray mt-2">Latency has been consistently low over the last hour.</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-lg">
+                            <h2 class="text-xl font-semibold mb-4 text-corporate-dark">Resource Usage</h2>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-white p-4 rounded-lg text-center shadow-md">
+                                    <h3 class="font-bold text-corporate-dark text-2xl">72%</h3>
+                                    <p class="text-corporate-gray">CPU</p>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg text-center shadow-md">
+                                    <h3 class="font-bold text-corporate-dark text-2xl">55%</h3>
+                                    <p class="text-corporate-gray">RAM</p>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg text-center shadow-md">
+                                    <h3 class="font-bold text-corporate-dark text-2xl">30%</h3>
+                                    <p class="text-corporate-gray">Storage</p>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg text-center shadow-md">
+                                    <h3 class="font-bold text-corporate-dark text-2xl">110 Mbps</h3>
+                                    <p class="text-corporate-gray">Network</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function renderSettings() {
+                contentContainer.innerHTML = `
+                    <div class="bg-white p-6 rounded-2xl shadow-lg">
+                        <h2 class="text-2xl font-semibold mb-6 text-corporate-dark">Settings</h2>
+                        <p class="text-corporate-gray">This page would contain various settings for the super administrator, such as managing notifications, user roles, and system configurations.</p>
+                        <!-- Example form placeholder -->
+                        <div class="mt-6 space-y-4">
+                            <div>
+                                <label class="block text-corporate-gray font-medium mb-1">Update Notifications</label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="form-checkbox text-corporate-blue rounded" checked>
+                                    <span class="ml-2 text-corporate-dark">Send me email alerts for new signups</span>
+                                </label>
+                            </div>
+                            <button class="bg-corporate-blue text-white px-4 py-2 rounded-lg font-medium transition-colors hover:bg-corporate-teal">Save Settings</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function initializeDashboardCharts() {
+                // Updated to 12 months of data
+                const growthData = {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [{
+                        label: 'New Clinics',
+                        data: [10, 15, 20, 18, 25, 30, 35, 32, 40, 45, 50, 60],
+                        borderColor: '#4a72d1',
+                        backgroundColor: 'rgba(74, 114, 209, 0.2)',
+                        tension: 0.3,
+                        fill: true
+                    }, {
+                        label: 'New Patients',
+                        data: [500, 750, 900, 850, 1100, 1300, 1500, 1450, 1800, 2000, 2200, 2500],
+                        borderColor: '#00b894',
+                        backgroundColor: 'rgba(0, 184, 148, 0.2)',
+                        tension: 0.3,
+                        fill: true
+                    }]
+                };
+
+                const revenueData = {
+                    labels: ['Subscriptions (70%)', 'Therapy Reports (20%)', 'Premium Features (10%)'],
+                    datasets: [{
+                        label: 'Revenue Breakdown',
+                        data: [70, 20, 10],
+                        backgroundColor: ['#4a72d1', '#00b894', '#6c757d'],
+                        hoverOffset: 4
+                    }]
+                };
+
+                const modulesData = {
+                    labels: ['Reporting', 'Scheduling', 'Patient Progress', 'Billing'],
+                    datasets: [{
+                        label: 'Module Usage',
+                        data: [850, 720, 610, 450], // Increased usage data
+                        backgroundColor: ['#4a72d1', '#00b894', '#6c757d', '#a8b9e6'],
+                        borderColor: 'rgba(0,0,0,0)',
+                        borderWidth: 1
+                    }]
+                };
+
+                myCharts.growthChart = new Chart(document.getElementById('growthChart'), {
+                    type: 'line',
+                    data: growthData,
+                    options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } }
+                });
+
+                myCharts.revenueChart = new Chart(document.getElementById('revenueChart'), {
+                    type: 'pie',
+                    data: revenueData,
+                    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+                });
+
+                myCharts.modulesChart = new Chart(document.getElementById('modulesChart'), {
+                    type: 'bar',
+                    data: modulesData,
+                    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+                });
+            }
+
+            function setupExportButtons(tableId) {
+                const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+                const exportExcelBtn = document.getElementById('exportExcelBtn');
+                const exportBusinessPdfBtn = document.getElementById('exportBusinessPdfBtn');
+                const exportBusinessExcelBtn = document.getElementById('exportBusinessExcelBtn');
+
+                if (downloadPdfBtn && exportExcelBtn) {
+                    const tableToExport = document.getElementById(tableId);
+
+                    downloadPdfBtn.addEventListener('click', () => {
+                        if (!tableToExport) return;
+                        html2canvas(tableToExport).then(canvas => {
+                            const imgData = canvas.toDataURL('image/png');
+                            const pdf = new window.jspdf.jsPDF();
+                            const imgProps = pdf.getImageProperties(imgData);
+                            const pdfWidth = pdf.internal.pageSize.getWidth();
+                            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                            pdf.save("report.pdf");
+                        });
+                    });
+
+                    exportExcelBtn.addEventListener('click', () => {
+                        if (!tableToExport) return;
+                        TableExport(tableToExport, { formats: ['xlsx'], filename: 'report' });
+                    });
+                }
+                
+                if(exportBusinessPdfBtn && exportBusinessExcelBtn) {
+                     exportBusinessPdfBtn.addEventListener('click', () => {
+                        const dashboardSection = document.getElementById('content-container');
+                        if (!dashboardSection) return;
+                        
+                        html2canvas(dashboardSection).then(canvas => {
+                            const imgData = canvas.toDataURL('image/png');
+                            const pdf = new window.jspdf.jsPDF('l', 'mm', 'a4'); // 'l' for landscape
+                            const imgProps = pdf.getImageProperties(imgData);
+                            const pdfWidth = pdf.internal.pageSize.getWidth();
+                            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                            pdf.save("business-report.pdf");
+                        });
+                    });
+
+                     exportBusinessExcelBtn.addEventListener('click', () => {
+                        // Updated mock data for business report export
+                        const mockData = [
+                             ["Metric", "Value"],
+                             ["Active Clinics", "380"],
+                             ["Ongoing Therapies", "4,500"], 
+                             ["Revenue (MRR)", "$150,000"],
+                             ["Active Therapists", "950"]
+                         ];
+                         TableExport.export(mockData, 'xlsx', 'business-report', false);
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
